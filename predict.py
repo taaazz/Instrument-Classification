@@ -26,6 +26,14 @@ model = load_model('./saved_models/audio_classification.keras')
 scaler = joblib.load('scaler.pkl')
 label_encoder = joblib.load('label_encoder.pkl')
 
+# Dictionary untuk menghubungkan label prediksi dengan nama instrumen
+label_to_instrument = {
+    1: "Sound Guitar",
+    2: "Sound Drum",
+    3: "Sound Violin",
+    4: "Sound Piano"
+}
+
 # Fungsi untuk klasifikasi
 def classify_audio(file):
     features = feature_extractor(file).reshape(1, -1)
@@ -33,7 +41,8 @@ def classify_audio(file):
     predictions = model.predict(scaled_features)
     predicted_label = np.argmax(predictions, axis=-1)
     prediction_class = label_encoder.inverse_transform(predicted_label)[0]
-    return prediction_class
+    instrument_name = label_to_instrument.get(prediction_class, "Unknown Instrument")
+    return instrument_name
 
 # Aplikasi Streamlit
 def app():
@@ -59,3 +68,4 @@ def app():
 
     st.markdown("---")
     st.markdown("© 2024 MSIB BATCH 6 BISA AI Academy")
+
