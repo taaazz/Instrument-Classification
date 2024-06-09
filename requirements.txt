@@ -1,0 +1,6 @@
+streamlit
+streamlit-option-menu
+librosa
+scikit-learn
+keras
+joblib
