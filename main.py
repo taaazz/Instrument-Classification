@@ -30,12 +30,12 @@ class MultiApp:
                 options=['Home','Predict','about'],
                 icons=['house-fill','graph-up','info-circle-fill'],
                 default_index=default_index,  # Menggunakan nilai default_index
-styles={
-    "container": {"padding": "5!important", "background": "#881a27"},
-    "icon": {"color": "white", "font-size": "23px"}, 
-    "nav-link": {"color": "white", "font-size": "20px", "text-align": "left", "margin": "0px", "--hover-color": "EEE58C"},
-    "nav-link-selected": {"background": "#7e1a26"}
-}
+        styles={
+            "container": {"padding": "5!important", "background": "#881a27"},
+            "icon": {"color": "white", "font-size": "23px"}, 
+            "nav-link": {"color": "white", "font-size": "20px", "text-align": "left", "margin": "0px", "--hover-color": "EEE58C"},
+            "nav-link-selected": {"background": "#7e1a26"}
+        }
 
             )
 
