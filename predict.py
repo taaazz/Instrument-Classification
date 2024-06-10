@@ -26,7 +26,6 @@ model = load_model('./saved_models/audio_classification.keras')
 scaler = joblib.load('scaler.pkl')
 label_encoder = joblib.load('label_encoder.pkl')
 
-# Dictionary untuk menghubungkan label prediksi dengan nama instrumen
 label_to_instrument = {
     1: "Sound Drum",
     2: "Sound Guitar",
