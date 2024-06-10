@@ -8,20 +8,20 @@ from io import BytesIO
 
 # Fungsi untuk ekstraksi fitur audio
 def feature_extractor(file):
-    # Membaca file audio dari BytesIO
-    audio, sample_rate = librosa.load(BytesIO(file.read()), sr=None, res_type='kaiser_fast')
-
-    zcr = np.mean(librosa.feature.zero_crossing_rate(audio).T, axis=0)
-    spectral_centroid = np.mean(librosa.feature.spectral_centroid(y=audio, sr=sample_rate).T, axis=0)
-    spectral_bandwidth = np.mean(librosa.feature.spectral_bandwidth(y=audio, sr=sample_rate).T, axis=0)
-    chroma_stft = np.mean(librosa.feature.chroma_stft(y=audio, sr=sample_rate).T, axis=0)
-    rmse = np.mean(librosa.feature.rms(y=audio).T, axis=0)
-    spectral_contrast = np.mean(librosa.feature.spectral_contrast(y=audio, sr=sample_rate).T, axis=0)
-    mfccs = np.mean(librosa.feature.mfcc(y=audio, sr=sample_rate, n_mfcc=40).T, axis=0)
-
-    features = np.concatenate([zcr, spectral_centroid, spectral_bandwidth, chroma_stft, rmse, spectral_contrast, mfccs])
-
-    return features
+    try:
+        audio, sample_rate = librosa.load(BytesIO(file.read()), sr=None, res_type='kaiser_fast')
+        zcr = np.mean(librosa.feature.zero_crossing_rate(audio).T, axis=0)
+        spectral_centroid = np.mean(librosa.feature.spectral_centroid(y=audio, sr=sample_rate).T, axis=0)
+        spectral_bandwidth = np.mean(librosa.feature.spectral_bandwidth(y=audio, sr=sample_rate).T, axis=0)
+        chroma_stft = np.mean(librosa.feature.chroma_stft(y=audio, sr=sample_rate).T, axis=0)
+        rmse = np.mean(librosa.feature.rms(y=audio).T, axis=0)
+        spectral_contrast = np.mean(librosa.feature.spectral_contrast(y=audio, sr=sample_rate).T, axis=0)
+        mfccs = np.mean(librosa.feature.mfcc(y=audio, sr=sample_rate, n_mfcc=40).T, axis=0)
+        features = np.concatenate([zcr, spectral_centroid, spectral_bandwidth, chroma_stft, rmse, spectral_contrast, mfccs])
+        return features
+    except Exception as e:
+        st.error(f"Error in feature extraction: {e}")
+        return None
 
 # Memuat model dan scaler
 model = load_model('./saved_models/audio_classification.keras')
@@ -38,13 +38,21 @@ label_to_instrument = {
 
 # Fungsi untuk klasifikasi
 def classify_audio(file):
-    features = feature_extractor(file).reshape(1, -1)
-    scaled_features = scaler.transform(features)
-    predictions = model.predict(scaled_features)
-    predicted_label = np.argmax(predictions, axis=-1)
-    prediction_class = label_encoder.inverse_transform(predicted_label)[0]
-    instrument_name = label_to_instrument.get(prediction_class, "Unknown Instrument")
-    return instrument_name
+    features = feature_extractor(file)
+    if features is None:
+        return "Error in feature extraction"
+    
+    try:
+        features = features.reshape(1, -1)
+        scaled_features = scaler.transform(features)
+        predictions = model.predict(scaled_features)
+        predicted_label = np.argmax(predictions, axis=-1)
+        prediction_class = label_encoder.inverse_transform(predicted_label)[0]
+        instrument_name = label_to_instrument.get(prediction_class, "Unknown Instrument")
+        return instrument_name
+    except Exception as e:
+        st.error(f"Error in classification: {e}")
+        return "Error in classification"
 
 # Aplikasi Streamlit
 def app():
@@ -57,12 +65,9 @@ def app():
         st.audio(uploaded_file, format='audio/wav' if uploaded_file.type == 'audio/wav' else 'audio/mp3')
         st.write("File audio berhasil diunggah dan diputar.")
 
-        try:
-            hasil_klasifikasi = classify_audio(uploaded_file)
-            st.subheader('Hasil Klasifikasi Menunjukkan')
-            st.write(f"Data termasuk dalam kelas: {hasil_klasifikasi}")
-        except Exception as e:
-            st.error(f"Terjadi kesalahan saat klasifikasi: {e}")
+        hasil_klasifikasi = classify_audio(uploaded_file)
+        st.subheader('Hasil Klasifikasi Menunjukkan')
+        st.write(f"Data termasuk dalam kelas: {hasil_klasifikasi}")
 
     st.subheader("Informasi Tambahan")
     st.write("""
