@@ -6,3 +6,4 @@ keras
 joblib
 tensorflow
 resampy
+tqdm
