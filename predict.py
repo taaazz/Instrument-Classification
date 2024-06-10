@@ -4,10 +4,12 @@ import librosa
 from sklearn.preprocessing import StandardScaler
 from keras.models import load_model
 import joblib
+from io import BytesIO
 
 # Fungsi untuk ekstraksi fitur audio
 def feature_extractor(file):
-    audio, sample_rate = librosa.load(file, res_type='kaiser_fast')
+    # Membaca file audio dari BytesIO
+    audio, sample_rate = librosa.load(BytesIO(file.read()), sr=None, res_type='kaiser_fast')
 
     zcr = np.mean(librosa.feature.zero_crossing_rate(audio).T, axis=0)
     spectral_centroid = np.mean(librosa.feature.spectral_centroid(y=audio, sr=sample_rate).T, axis=0)
@@ -29,7 +31,7 @@ label_encoder = joblib.load('label_encoder.pkl')
 # Dictionary untuk menghubungkan label prediksi dengan nama instrumen
 label_to_instrument = {
     1: "Sound Guitar",
-    2: "Sound Drum ",
+    2: "Sound Drum",
     3: "Sound Violin",
     4: "Sound Piano"
 }
@@ -55,9 +57,12 @@ def app():
         st.audio(uploaded_file, format='audio/wav' if uploaded_file.type == 'audio/wav' else 'audio/mp3')
         st.write("File audio berhasil diunggah dan diputar.")
 
-        hasil_klasifikasi = classify_audio(uploaded_file)
-        st.subheader('Hasil Klasifikasi Menunjukkan')
-        st.write(f"Data termasuk dalam kelas: {hasil_klasifikasi}")
+        try:
+            hasil_klasifikasi = classify_audio(uploaded_file)
+            st.subheader('Hasil Klasifikasi Menunjukkan')
+            st.write(f"Data termasuk dalam kelas: {hasil_klasifikasi}")
+        except Exception as e:
+            st.error(f"Terjadi kesalahan saat klasifikasi: {e}")
 
     st.subheader("Informasi Tambahan")
     st.write("""
@@ -68,4 +73,3 @@ def app():
 
     st.markdown("---")
     st.markdown("© 2024 MSIB BATCH 6 BISA AI Academy")
-
