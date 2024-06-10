@@ -24,9 +24,12 @@ def feature_extractor(file):
         return None
 
 # Memuat model dan scaler
-model = load_model('./saved_models/audio_classification.keras')
-scaler = joblib.load('scaler.pkl')
-label_encoder = joblib.load('label_encoder.pkl')
+try:
+    model = load_model('./saved_models/audio_classification.keras')
+    scaler = joblib.load('scaler.pkl')
+    label_encoder = joblib.load('label_encoder.pkl')
+except Exception as e:
+    st.error(f"Error loading model or scaler: {e}")
 
 # Dictionary untuk menghubungkan label prediksi dengan nama instrumen
 label_to_instrument = {
